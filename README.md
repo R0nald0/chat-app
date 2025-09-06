@@ -1,16 +1,53 @@
-# chat
+# 📱 Chat App com Vídeos Curtos
 
-A new Flutter project.
+Um aplicativo de **chat** desenvolvido em **Flutter**, que combina **conversas em tempo real** com a experiência de **vídeos curtos** no estilo *Reels/TikTok*.  
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## ✨ Funcionalidades
 
-A few resources to get you started if this is your first Flutter project:
+- 💬 Conversas em tempo real entre usuários  
+- 🎥 Feed de vídeos curtos para assistir  
+- 📹 Criação de vídeos curtos  
+- 🧑‍🤝‍🧑 Perfil de usuário com nome e foto  
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🚀 Tecnologias Utilizadas
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- [Flutter](https://flutter.dev/)  
+- [Dart](https://dart.dev/)  
+- [video_player](https://pub.dev/packages/video_player) – reprodução de vídeos  
+- Gerenciamento de estado Bloc
+- Injeção de dependência com GetIt 
+- Integração com APIs para dados dinâmicos  
+
+---
+
+## 📸 Screenshots
+
+> *(Adicione prints do app rodando aqui)*  
+
+| Tela de Chat | Feed de Vídeos | Criar Vídeo |
+|--------------|----------------|-------------|
+| ![](prints/chat.png) | ![](prints/feed.png) | ![](prints/create.png) |
+
+---
+
+## 🔧 Instalação e Execução
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/chat-videos-app.git
+   ```
+2. Acesse o diretório do projeto:
+   ```bash
+   cd chat-videos-app```
+
+3. Instale as dependências:
+   ```bash
+    flutter pub get```
+
+4. Execute o projeto
+   ```bash
+    flutter run```
+  

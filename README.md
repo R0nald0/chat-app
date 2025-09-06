@@ -37,7 +37,7 @@ Um aplicativo de **chat** desenvolvido em **Flutter**, que combina **conversas e
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/chat-videos-app.git
+   git clone git@github.com:R0nald0/chat-app.git
    ```
 2. Acesse o diretório do projeto:
    ```bash

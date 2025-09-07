@@ -5,7 +5,7 @@ class ContactInfoWidget extends StatelessWidget {
   final String? imageUrl;
   final String description;
   final VoidCallback onTap;
-  final IconData? icon;
+  final Widget? icon;
 
   const ContactInfoWidget.withIcon({
     super.key,
@@ -29,13 +29,13 @@ class ContactInfoWidget extends StatelessWidget {
     return ListTile(
       title: Text(title, style: TextStyle(color: Colors.white)),
       subtitle: Text(description),
-      trailing: icon != null ? Icon(icon) :null,
+      trailing: icon,
       leading: CircleAvatar(
         radius: 30,
         backgroundColor: imageUrl == null ? Colors.amberAccent : null,
         backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
       ),
-      onTap:  () => onTap,
+      onTap:  () => onTap(),
     );
   }
 }

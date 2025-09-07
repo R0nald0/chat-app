@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:chat/src/app/core/constants/chat_constants.dart';
 import 'package:chat/src/app/core/exceptions/data_source_exception.dart';
 import 'package:chat/src/app/core/exceptions/repository_exception.dart';
 import 'package:chat/src/app/core/services/chat_service_sockte.dart';
 import 'package:chat/src/app/data/datasource/chat_message_data_souce.dart';
+import 'package:chat/src/app/data/dto/user_dto.dart';
 import 'package:chat/src/app/domain/model/message.dart';
-import 'package:chat/src/app/domain/model/user.dart';
 import 'package:chat/src/app/domain/repository/message_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,7 +38,7 @@ class MessageRepositoryImpl implements MessageRepository {
       if (user == null) {
         throw RepositoryException(message: 'Erro ao buscar dados do usuário');
       }
-      final User(:id) = User.fromJson(user);
+      final UserDto(:id) = UserDto.fromJson(user);
       _chatServiceSockte.sendMessage(message);
     } on RepositoryException catch (e) {
       throw RepositoryException(message: e.message);

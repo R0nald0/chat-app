@@ -1,6 +1,7 @@
 
 import 'package:chat/src/app/core/constants/chat_constants.dart';
 import 'package:chat/src/app/core/exceptions/user_not_found.dart';
+import 'package:chat/src/app/data/dto/user_dto.dart';
 import 'package:chat/src/app/domain/model/user.dart';
 import 'package:chat/src/app/domain/repository/find_my_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +14,8 @@ class FindMyRepositoryImpl  implements FindMyRepository{
     if(user == null){
        throw UserNotFound();
     }
-    return User.fromJson(user);
+    final u = UserDto.fromJson(user);
+    return User.fromUserDto(u);
   }
   
 }

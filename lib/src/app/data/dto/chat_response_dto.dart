@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import 'package:chat/src/app/domain/model/user.dart';
+import 'package:chat/src/app/data/dto/user_dto.dart';
+
 
 class ChatResponseDto {
-  final User user;
+  final UserDto user;
   final String token;
   ChatResponseDto({required this.user, required this.token});
 
@@ -14,7 +15,7 @@ class ChatResponseDto {
   factory ChatResponseDto.fromMap(Map<String, dynamic> map) {
     return switch (map) {
       {'user': final Map<String,dynamic> user, 'token': final String token} => ChatResponseDto(
-        user: User.fromMap(user),
+        user: UserDto.fromMap(user),
         token: token,
       ),
       _=> throw ArgumentError('Invalid json')

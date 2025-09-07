@@ -3,8 +3,8 @@ import 'package:chat/src/app/core/exceptions/data_source_exception.dart';
 import 'package:chat/src/app/core/exceptions/repository_exception.dart';
 import 'package:chat/src/app/data/datasource/chat_auth_rest_client.dart';
 import 'package:chat/src/app/data/dto/chat_response_dto.dart';
-import 'package:chat/src/app/domain/repository/auth_repository.dart';
 import 'package:chat/src/app/domain/model/user.dart';
+import 'package:chat/src/app/domain/repository/auth_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,15 +23,16 @@ class AuthRepositoryImpl implements AuthRepository {
       final ChatResponseDto(:user, :token) = await _restClient.unAuth().login(data);
       
        await _storage.write(key: ChatConstants.KEY_SECURITY, value: token, 
-       );
-       final isSaved  = await prefs.setString(ChatConstants.PREF_KEY, user.toJson());
+       ); 
+    
+       final isSaved  = await prefs.setString(ChatConstants.PREF_KEY,user.toJson());
        
       if (!isSaved) {
         _storage.delete(key: ChatConstants.KEY_SECURITY);
         throw RepositoryException(message: 'Erro ao salvar dados do usuário realizar o login novamente');
       }
  
-      return user;
+      return  User.fromUserDto(user);
     } on DataSourceException catch (e) {
       throw RepositoryException(message: e.message);
     }

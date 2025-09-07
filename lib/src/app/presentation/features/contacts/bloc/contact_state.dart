@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:chat/src/app/domain/model/user.dart';
 
 enum ContactStatus {
-  loading,initial ,error,success
+  loading,initial ,error,success,findUser
 }
 class ContactState {
   final ContactStatus status;

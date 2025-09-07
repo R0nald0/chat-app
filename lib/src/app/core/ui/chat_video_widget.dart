@@ -158,7 +158,7 @@ class _ChatVideoWidgetState extends State<ChatVideoWidget> {
                               title: widget.nameOwner,
                               imageUrl: widget.urlImage,
                               description: widget.desciption,
-                              icon: Icons.favorite,
+                              icon: Icon(Icons.favorite),
                               onTap: () => widget.onFavorite,
                             ),
                           ),

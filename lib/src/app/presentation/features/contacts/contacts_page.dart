@@ -1,8 +1,8 @@
 import 'package:chat/src/app/core/message/chat_message.dart';
 import 'package:chat/src/app/core/provider/service_locator.dart';
+import 'package:chat/src/app/core/ui/widgets/chat_loader.dart';
 import 'package:chat/src/app/core/ui/widgets/contact_info_widget.dart';
 import 'package:chat/src/app/domain/model/conversation.dart';
-import 'package:chat/src/app/domain/model/user.dart';
 import 'package:chat/src/app/presentation/features/contacts/bloc/contact_cubit.dart';
 import 'package:chat/src/app/presentation/features/contacts/bloc/contact_state.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +17,16 @@ class ContactsPage extends StatefulWidget {
 
 class _ContactsPageState extends State<ContactsPage> {
   final contactBloc = getIt.get<ContactCubit>();
-  final List<User> contactFound = [];
   final _searchEC = TextEditingController();
+  var showResultSearch = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await contactBloc.findMyContacts();
+    });
+  }
 
   @override
   void dispose() {
@@ -42,46 +50,99 @@ class _ContactsPageState extends State<ContactsPage> {
                 bloc: contactBloc,
                 listener: (context, state) {
                   if (state.status == ContactStatus.error) {
+                    showResultSearch = false;
+                   
                     ChatMessage.showError(
-                      state.message ?? 'erro ao buscar contato',
+                      state.message ?? 'Conto não encontrado',
                       context,
                     );
                   }
                 },
                 builder: (context, state) {
-                  final ContactState(:status) = state;
-                  return SearchBar(
-                    controller: _searchEC,
-                    trailing: [
-                      status == ContactStatus.loading
-                          ? CircularProgressIndicator(
-                              color: Colors.amber,
-                              strokeAlign: .5,
-                              strokeWidth: 1,
-                            )
-                          : IconButton(
-                              onPressed: () {
-                                contactBloc.findUserByEmail(_searchEC.text);
-                              },
-                              icon: Icon(Icons.add),
-                            ),
-                    ],
-                    leading: Icon(Icons.search),
-                    padding: WidgetStatePropertyAll(
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    ),
-                    hintStyle: WidgetStatePropertyAll(
-                      TextStyle(color: Colors.grey.withAlpha(200)),
-                    ),
-                    hintText: 'Find contact',
+                  final ContactState(:status, :contact) = state;
+                  return Column(
+                    spacing: 10,
+                    children: [
+                      SearchBar(
+                        controller: _searchEC,
+                        trailing: [
+                          status == ContactStatus.loading
+                              ? CircularProgressIndicator(
+                                  color: Colors.amber,
+                                  strokeAlign: .5,
+                                  strokeWidth: 1,
+                                )
+                              : IconButton(
+                                  onPressed: () {
+                                    verifySearchText(_searchEC.text);
+                                     _searchEC.text = '';
+                                  },
+                                  icon: Icon(Icons.add),
+                                ),
+                        ],
+                        leading: Icon(Icons.search),
+                        padding: WidgetStatePropertyAll(
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        ),
+                        hintStyle: WidgetStatePropertyAll(
+                          TextStyle(color: Colors.grey.withAlpha(200)),
+                        ),
+                        hintText: 'Find contact',
 
-                    onSubmitted: (value) {
-                      contactBloc.findUserByEmail(value);
-                    },
-                    onChanged: (value) {},
+                        onSubmitted: (email) {
+                          verifySearchText(email);
+                           _searchEC.text = '';
+                        },
+                        onChanged: (value) {
+                          if (value.isEmpty) {
+                            showResultSearch = false;
+                            contactBloc.findUserByEmail(value);
+                          }
+                        },
+                      ),
+                      Visibility(
+                        replacement: SizedBox.shrink(),
+                        visible :status == ContactStatus.findUser &&
+                            showResultSearch && contact != null
+                            , 
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'User Found',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            ContactInfoWidget(
+                              title: contact?.name ?? "No user",
+                              description: contact?.email ?? 'No email',
+                              imageUrl: contact?.urlImage,
+                              icon: Visibility(
+                                replacement: FractionallySizedBox(
+                                  widthFactor: 0.06,
+                                  child: ChatLoader(size: 20),
+                                ),
+                                visible: status == ContactStatus.findUser,
+                                child: Icon(Icons.add),
+                              ),
+                              onTap: () {
+                                if (contact?.id != null &&
+                                    status == ContactStatus.findUser) {
+                                  contactBloc.addContact(contact!);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
+
               Text(
                 'My contacts',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
@@ -89,24 +150,28 @@ class _ContactsPageState extends State<ContactsPage> {
               BlocBuilder<ContactCubit, ContactState>(
                 bloc: contactBloc,
                 builder: (context, state) {
-                  final ContactState(:status, :contact) = state;
-                  return switch (status) {
-                    ContactStatus.success => Expanded(
+                  final ContactState(:status, :contacts) = state;
+                  return Expanded(
+                    child: Visibility(
+                      replacement: Center(child: Text('Find your contacts')),
+                      visible: contacts.isNotEmpty,
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: [contact].length,
+                        itemCount: contacts.length,
                         itemBuilder: (context, index) {
+                          final myContatc = contacts[index];
                           return ContactInfoWidget.withIcon(
-                            title: contact!.name,
-                            description: contact.email,
-                            icon: Icons.message,
+                            title: myContatc.name,
+                            imageUrl: myContatc.urlImage,
+                            description: myContatc.email,
+                            icon: Icon(Icons.message),
                             onTap: () {
                               final privateConversation = Conversation(
-                                contactimageUrl: contact.urlImage,
-                                idContact: contact.id!,
+                                contactimageUrl: myContatc.urlImage,
+                                idContact: myContatc.id!,
                                 lastMassage: '',
                                 timeLastMessage: DateTime.now(),
-                                contactName: contact.name,
+                                contactName: myContatc.name,
                               );
                               Navigator.of(context).pushNamed(
                                 '/home/conversation',
@@ -117,8 +182,7 @@ class _ContactsPageState extends State<ContactsPage> {
                         },
                       ),
                     ),
-                    _ => SizedBox.shrink(),
-                  };
+                  );
                 },
               ),
             ],
@@ -126,5 +190,12 @@ class _ContactsPageState extends State<ContactsPage> {
         ),
       ),
     );
+  }
+
+  void verifySearchText(String email) {
+    if (email.isNotEmpty) {
+      contactBloc.findUserByEmail(email);
+      showResultSearch = true;
+    }
   }
 }

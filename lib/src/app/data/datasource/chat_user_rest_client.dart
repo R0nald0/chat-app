@@ -40,7 +40,7 @@ class ChatUserRestClient {
   Future<UserDto> findByEmail(String email) async {
     try {
       final Response(:data) = await _dio.get(
-       '/users',
+        '/users',
         queryParameters: {'email': email},
       );
 
@@ -48,7 +48,7 @@ class ChatUserRestClient {
     } on DioException catch (e, s) {
       if (e.response?.statusCode == 404) {
         log('erro ao buscar dados do contato ', error: e, stackTrace: s);
-          throw UserNotFound();
+        throw UserNotFound();
       }
       log('erro ao buscar dados do contato ', error: e, stackTrace: s);
       throw DataSourceException(
@@ -58,6 +58,39 @@ class ChatUserRestClient {
     } on ArgumentError catch (e, s) {
       log('Json invalido', error: e, stackTrace: s);
       throw DataSourceException(message: "Json invalido");
+    }
+  }
+
+  Future<List<UserDto>> findMyContacts(int id) async {
+    try {
+      final Response(data: result) = await _dio.get('/users/$id');
+
+      return result['contacts']
+          .map<UserDto>((u) => UserDto.fromMap(u))
+          .toList();
+    } on DioException catch (e, s) {
+      log('erro ao buscar  contato ', error: e, stackTrace: s);
+      throw DataSourceException();
+    } on ArgumentError catch (e, s) {
+      log('Json invalido', error: e, stackTrace: s);
+      throw DataSourceException(message: "Json invalido");
+    }
+  }
+
+  Future<int?> addContact(int contactId) async {
+    try {
+      final Response(data: result) = await _dio.put(
+        '/users',
+        data: {"contact_id": contactId},
+      );
+
+      return result['contact_id'];
+    } on DioException catch (e, s) {
+      log('erro ao Adicioonar contato ', error: e, stackTrace: s);
+      throw DataSourceException();
+    } on FormatException catch (e, s) {
+      log('erro ao Adiconar contato ', error: e, stackTrace: s);
+      throw DataSourceException();
     }
   }
 }

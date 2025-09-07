@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:chat/src/app/data/dto/user_dto.dart';
+
 
 class User {
   final int? id;
@@ -25,8 +27,18 @@ class User {
       'image_url' : urlImage
     };
   }
+  factory User.fromUserDto(UserDto map) {
+    return 
+      User(
+      id: map.id ,
+      urlImage:map.imageUrl,
+      name: map.name,
+      email: map.email,
+      password: '',
+    );
+  }
 
-  factory User.fromMap(Map<String, dynamic> map) {
+  factory User.fromMap(Map<String,dynamic> map) {
     return switch(map){
       {
         'id' :final int id,

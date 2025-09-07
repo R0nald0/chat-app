@@ -17,9 +17,11 @@ import 'package:chat/src/app/domain/repository/find_my_repository.dart';
 import 'package:chat/src/app/domain/repository/message_repository.dart';
 import 'package:chat/src/app/domain/repository/short_video_repository.dart';
 import 'package:chat/src/app/domain/repository/user_repository.dart';
+import 'package:chat/src/app/domain/usecase/add_contact.dart';
 import 'package:chat/src/app/domain/usecase/conversation_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_all_message_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_by_email_use_case.dart';
+import 'package:chat/src/app/domain/usecase/find_my_contacts.dart';
 import 'package:chat/src/app/domain/usecase/find_my_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_short_videos.dart';
 import 'package:chat/src/app/domain/usecase/login_use_case.dart';
@@ -78,10 +80,24 @@ void setup() {
       userRepository: getIt.get<UserRepository>(),
     ),
   );
+
+  getIt.registerLazySingleton(
+    () => FindMyContacts(
+      findMyUseCase: getIt.get<FindMyUseCase>() ,
+      userRepository: getIt.get<UserRepository>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => AddContact(
+      userRepository: getIt.get<UserRepository>(),
+    ),
+  );
     
    getIt.registerLazySingleton(
     () => ContactCubit(
-     findByEmail: getIt.get<FindByEmailUseCase>()
+     findByEmail: getIt.get<FindByEmailUseCase>(),
+     findMyContacts:   getIt.get<FindMyContacts>(),
+     addContact: getIt.get<AddContact>()
     ),
   );
 

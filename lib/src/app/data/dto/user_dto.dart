@@ -1,16 +1,26 @@
 import 'dart:convert';
 
+import 'package:chat/src/app/domain/model/user.dart';
+
 class UserDto {
   final String email; 
   final String name;
-  final int id;
+  final int? id;
   final String? imageUrl; 
   UserDto( {required this.email, required this.imageUrl, required this.name, required this.id});
 
   Map<String, dynamic> toMap() {
-    return {'email': email, 'name': name, 'id': id,?imageUrl : 'image_url'};
+    return {'email': email, 'name': name, 'id': id, 'image_url' : imageUrl};
   }
-
+  factory UserDto.fromUser(User user) {
+    return 
+        UserDto(
+          imageUrl: user.urlImage  ,
+          email: user.email,
+          name:user.name,
+          id: user.id ?? 0,
+        );
+  }
   factory UserDto.fromMap(Map<String, dynamic> map) {
     return switch (map) {
       {

@@ -14,14 +14,38 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<User> findUserbyEmail(String emailToSearch) async {
     try {
-      final UserDto(:name, :email, :id, imageUrl:urlImage) = await _userRestClient.auth().findByEmail(
-        emailToSearch,
+      final UserDto(:name, :email, :id, imageUrl: urlImage) =
+          await _userRestClient.auth().findByEmail(emailToSearch);
+      return User(
+        id: id,
+        name: name,
+        email: email,
+        password: '',
+        urlImage: urlImage,
       );
-      return User( id:id ,name: name, email: email, password: '',urlImage:urlImage );
     } on DataSourceException catch (e) {
       throw RepositoryException(message: e.message);
-    }on UserNotFound  {
+    } on UserNotFound {
       rethrow;
+    }
+  }
+
+  @override
+  Future<List<User>> findMyContacts(int id) async {
+    try {
+      final userDto = await _userRestClient.auth().findMyContacts(id);
+      return userDto.map<User>((user) => User.fromUserDto(user)).toList();
+    } on DataSourceException catch (e) {
+      throw RepositoryException(message: e.message);
+    }
+  }
+
+  @override
+  Future<int?> addContact(int contactId) async {
+    try {
+      return await _userRestClient.auth().addContact(contactId);
+    } on DataSourceException catch (e) {
+      throw RepositoryException(message: e.message);
     }
   }
 }

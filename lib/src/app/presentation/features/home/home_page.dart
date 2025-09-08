@@ -3,34 +3,49 @@ import 'package:chat/src/app/core/message/chat_message.dart';
 import 'package:chat/src/app/core/provider/service_locator.dart';
 import 'package:chat/src/app/core/ui/widgets/chat_loader.dart';
 import 'package:chat/src/app/core/ui/widgets/contact_wiget.dart';
+import 'package:chat/src/app/presentation/features/auth/bloc/auth_cubit.dart';
+import 'package:chat/src/app/presentation/features/auth/bloc/auth_state.dart';
 import 'package:chat/src/app/presentation/features/home/bloc/home_cubit.dart';
 import 'package:chat/src/app/presentation/features/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  late HomeCubit homeBloc;
-
-  @override
-  void initState() {
-    homeBloc = getIt.get<HomeCubit>();
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      homeBloc.findAllByUser();
-    });
-  }
+class HomePage extends StatelessWidget {
+  final homeBloc = getIt.get<HomeCubit>()..findAllByUser();
+  final authCubit = getIt.get<AuthCubit>();
+  HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text('Messages')),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text('Messages'),
+        actions: [
+          BlocListener<AuthCubit, AuthState>(
+            bloc: authCubit,
+            listener: (context, state) {
+              if (state.status == AuthStatus.error) {
+                ChatMessage.showError(
+                  state.message ?? 'erro ao delogar usuário',
+                  context,
+                );
+              }
+              if (state.status == AuthStatus.success) {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (_) => false);
+              }
+            },
+            child: IconButton(
+              onPressed: () {
+                authCubit.logout();
+              },
+              icon: Icon(Icons.exit_to_app),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -58,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                         }
                       },
                       builder: (context, state) {
-                        final HomeState(:conversations, :message, :status,) =
+                        final HomeState(:conversations, :message, :status) =
                             state;
                         return switch (status) {
                           HomeStatus.initial => Center(
@@ -74,49 +89,68 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: ListView.builder(
                               itemCount: conversations.length,
-                              padding: EdgeInsets.symmetric(horizontal: 10,vertical: 18),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 18,
+                              ),
                               itemBuilder: (context, index) {
                                 final conversation = conversations[index];
                                 return ListTile(
-                                  title: Text(conversation.contactName,
-                                  style:TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 18
-                                  ) ,),
-                                  subtitle: RichText(
-                                     overflow: TextOverflow.ellipsis,
-                                     maxLines: 1,
-                                     text: TextSpan(
-                                     style:TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 16
-                                  ),
-                                      children: [
-                                          WidgetSpan(child: Icon(Icons.done_all,size: 20,color: Colors.blueGrey,)),
-                                          TextSpan(
-                                            text:' ${conversation.lastMassage}',
-                                          )
-                                      ]
-                                     ) 
+                                  title: Text(
+                                    conversation.contactName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18,
                                     ),
-                                  trailing: Text(conversation.timeLastMessage.formatedToStringDayMinute(),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16
                                   ),
+                                  subtitle: RichText(
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 16,
+                                      ),
+                                      children: [
+                                        WidgetSpan(
+                                          child: Icon(
+                                            Icons.done_all,
+                                            size: 20,
+                                            color: Colors.blueGrey,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: ' ${conversation.lastMassage}',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    conversation.timeLastMessage
+                                        .formatedToStringDayMinute(),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
                                   ),
 
                                   leading: CircleAvatar(
                                     radius: 30,
-                                     backgroundColor: conversation.contactimageUrl == null ? Colors.amberAccent : null,
-                                    backgroundImage:conversation.contactimageUrl != null  ?NetworkImage(
-                                      conversation.contactimageUrl!    
-                                    ) : null,
+                                    backgroundColor:
+                                        conversation.contactimageUrl == null
+                                        ? Colors.amberAccent
+                                        : null,
+                                    backgroundImage:
+                                        conversation.contactimageUrl != null
+                                        ? NetworkImage(
+                                            conversation.contactimageUrl!,
+                                          )
+                                        : null,
                                   ),
                                   onTap: () {
                                     Navigator.of(context).pushNamed(
                                       '/home/conversation',
-                                       arguments: conversation,
+                                      arguments: conversation,
                                     );
                                   },
                                 );
@@ -155,10 +189,10 @@ class RecentsSection extends StatelessWidget {
           children: [
             Padding(
               padding: EdgeInsetsGeometry.symmetric(horizontal: 5),
-              child: Text("Stores",style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16
-              ),),
+              child: Text(
+                "Stores",
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+              ),
             ),
             Expanded(
               child: ListView.builder(

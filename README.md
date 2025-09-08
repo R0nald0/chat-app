@@ -19,13 +19,11 @@ Um aplicativo de **chat** desenvolvido em **Flutter**, que combina **conversas e
 - [video_player](https://pub.dev/packages/video_player) – reprodução de vídeos  
 - Gerenciamento de estado Bloc
 - Injeção de dependência com GetIt 
-- Integração com APIs para dados dinâmicos  
-
+- Integração com APIs para dados dinâmicos [chat_api](https://github.com/R0nald0/chat_api_backend) 
+https://github.com/R0nald0/chat_api_backend
 ---
 
 ## 📸 Screenshots
-
-> *(Adicione prints do app rodando aqui)*  
 
 | Tela de Chat | Feed de Vídeos | Criar Vídeo |
 |--------------|----------------|-------------|

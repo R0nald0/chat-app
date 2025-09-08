@@ -1,3 +1,4 @@
+import 'package:chat/src/app/core/constants/chat_constants.dart';
 import 'package:chat/src/app/core/message/chat_message.dart';
 import 'package:chat/src/app/core/provider/service_locator.dart';
 import 'package:chat/src/app/core/ui/widgets/chat_loader.dart';
@@ -36,13 +37,14 @@ class _LoginPageState extends State<LoginPage> {
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Form(
               key: _formkey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 15,
                 children: [
+                  Image.asset(ChatConstants.LOGO_APP,scale: 5,),
                   ChatTextField(
                     keyboardType: TextInputType.emailAddress,
                     validator: Validatorless.multiple([
@@ -64,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                     ]),
                     controller: _passwordController,
                     icon: Icons.key,
-                    label: 'Pessword',
+                    label: 'Password',
                   ),
           
                   BlocConsumer<AuthCubit, AuthState>(

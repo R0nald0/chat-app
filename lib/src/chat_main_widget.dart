@@ -1,7 +1,9 @@
+import 'package:chat/src/app/core/ui/theme/chat_app_them.dart';
 import 'package:chat/src/app/domain/model/conversation.dart';
 import 'package:chat/src/app/presentation/features/auth/login_page.dart';
 import 'package:chat/src/app/presentation/features/auth/register_page.dart';
 import 'package:chat/src/app/presentation/features/conversation/conversation_page.dart';
+import 'package:chat/src/app/presentation/features/splashcreen/splash_screen_page.dart';
 import 'package:chat/src/app/presentation/main_navigation.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +15,10 @@ class ChatMainWidget extends StatelessWidget {
    Widget build(BuildContext context) {
        return  MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData.dark(),
-      initialRoute: '/login',
+      theme: ChatAppTheme.dark,
+      initialRoute: '/splash-screen',
       routes: {
+        '/splash-screen' : (context) => SplashScreenPage(),
         '/login' : (context) => LoginPage(),
         '/register' : (context) => RegisterPage(),
         '/mainvaigation' : (context) => MainNavigation(),

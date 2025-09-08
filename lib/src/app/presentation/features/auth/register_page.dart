@@ -191,6 +191,7 @@ class ChatTextField extends StatelessWidget {
       controller: controller,
       validator:validator,
       decoration: InputDecoration(
+        
         prefixIcon: Icon(icon),
         label: Text(label),
         filled: true,

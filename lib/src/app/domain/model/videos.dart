@@ -1,4 +1,6 @@
 
+import 'package:chat/src/app/data/dto/story_dto.dart';
+
 class Video {
    final String? id;
    final String descrition;
@@ -20,5 +22,17 @@ class Video {
     required this.exparesAt,
     required this.createdAt,
   });
-
+   
+   factory  Video.fromVideoDto(String ownerName, String ownerUrlImge ,VideoDto dto){
+     return Video(
+      descrition: dto.description, 
+      urlVideo: dto.urlVideo, 
+      duration: dto.duration, 
+      ownerId: dto.ownerId, 
+      ownerName: ownerName, 
+      ownerUrlImge: ownerUrlImge, 
+      exparesAt: DateTime.now(), 
+      createdAt: dto.createdAt,
+      )  ; 
+  }
 }

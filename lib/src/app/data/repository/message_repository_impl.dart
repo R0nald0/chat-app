@@ -2,7 +2,7 @@ import 'package:chat/src/app/core/constants/chat_constants.dart';
 import 'package:chat/src/app/core/exceptions/data_source_exception.dart';
 import 'package:chat/src/app/core/exceptions/repository_exception.dart';
 import 'package:chat/src/app/core/services/chat_service_sockte.dart';
-import 'package:chat/src/app/data/datasource/chat_message_data_souce.dart';
+import 'package:chat/src/app/data/datasource/chat_message_rest_client.dart';
 import 'package:chat/src/app/data/dto/user_dto.dart';
 import 'package:chat/src/app/domain/model/message.dart';
 import 'package:chat/src/app/domain/repository/message_repository.dart';

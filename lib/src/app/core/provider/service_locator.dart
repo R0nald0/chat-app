@@ -1,20 +1,21 @@
 import 'package:chat/src/app/core/services/chat_service_sockte.dart';
 import 'package:chat/src/app/data/datasource/chat_auth_rest_client.dart';
 import 'package:chat/src/app/data/datasource/chat_conversation_rest_client.dart';
-import 'package:chat/src/app/data/datasource/chat_message_data_souce.dart';
+import 'package:chat/src/app/data/datasource/chat_message_rest_client.dart';
 import 'package:chat/src/app/data/datasource/chat_user_rest_client.dart';
+import 'package:chat/src/app/data/datasource/chat_videos_rest_client.dart';
 import 'package:chat/src/app/data/repository/auth_repository_impl.dart';
 import 'package:chat/src/app/data/repository/conversation_repository.dart';
 import 'package:chat/src/app/data/repository/find_my_repository_impl.dart';
 import 'package:chat/src/app/data/repository/message_repository_impl.dart';
 import 'package:chat/src/app/data/repository/user_repository_impl.dart';
-import 'package:chat/src/app/data/repository/videos_shorts_repository.dart';
+import 'package:chat/src/app/data/repository/videos_shorts_repository_impl.dart';
 import 'package:chat/src/app/domain/repository/auth_repository.dart';
 import 'package:chat/src/app/domain/repository/conversation_repository.dart';
 import 'package:chat/src/app/domain/repository/find_my_repository.dart';
 import 'package:chat/src/app/domain/repository/message_repository.dart';
-import 'package:chat/src/app/domain/repository/short_video_repository.dart';
 import 'package:chat/src/app/domain/repository/user_repository.dart';
+import 'package:chat/src/app/domain/repository/videos_shorts_repository.dart';
 import 'package:chat/src/app/domain/usecase/add_contact.dart';
 import 'package:chat/src/app/domain/usecase/conversation_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_all_message_use_case.dart';
@@ -22,17 +23,13 @@ import 'package:chat/src/app/domain/usecase/find_by_email_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_my_contacts.dart';
 import 'package:chat/src/app/domain/usecase/find_my_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_short_videos.dart';
+import 'package:chat/src/app/domain/usecase/find_story_my_contacts.dart';
 import 'package:chat/src/app/domain/usecase/login_use_case.dart';
 import 'package:chat/src/app/domain/usecase/lout_use_case.dart';
 import 'package:chat/src/app/domain/usecase/received_message_user_case.dart';
 import 'package:chat/src/app/domain/usecase/register_use_case.dart';
 import 'package:chat/src/app/domain/usecase/send_message_use_case.dart';
-import 'package:chat/src/app/presentation/features/auth/bloc/auth_cubit.dart';
-import 'package:chat/src/app/presentation/features/contacts/bloc/contact_cubit.dart';
-import 'package:chat/src/app/presentation/features/conversation/bloc/conversation_cubit.dart';
-import 'package:chat/src/app/presentation/features/home/bloc/home_cubit.dart';
 import 'package:chat/src/app/presentation/features/splashcreen/bloc/splash_screen_bloc.dart';
-import 'package:chat/src/app/presentation/features/story/bloc/story_cubit.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
@@ -44,7 +41,9 @@ void setup() {
     () =>
         ChatConversationRestClient(storage: getIt.get<FlutterSecureStorage>()),
   );
-
+  getIt.registerLazySingleton(
+    () => ChatVideosRestClient(storage: getIt.get<FlutterSecureStorage>()),
+  );
   getIt.registerLazySingleton<ConversationRepository>(
     () => ConversationRepositoryImpl(
       chatConversationRestClient: getIt.get<ChatConversationRestClient>(),
@@ -53,6 +52,11 @@ void setup() {
 
   getIt.registerLazySingleton(
     () => LogoutUseCase(authRepository: getIt.get<AuthRepository>()),
+  );
+  getIt.registerLazySingleton<VideosShortsRepository>(
+    () => VideosShortsRepositoryImpl(
+      chatVideosRestClient: getIt.get<ChatVideosRestClient>()
+    ),
   );
   //Auth
   getIt.registerLazySingleton(() => ChatAuthRestClient());
@@ -67,14 +71,6 @@ void setup() {
   );
   getIt.registerLazySingleton(
     () => RegisterUseCase(authRepository: getIt.get<AuthRepository>()),
-  );
-
-  getIt.registerLazySingleton(
-    () => AuthCubit(
-      logoutUseCse: getIt.get<LogoutUseCase>(),
-      loginUseCase: getIt.get<LoginUseCase>(),
-      registrtUseCase: getIt.get<RegisterUseCase>(),
-    ),
   );
 
   //Contact
@@ -99,14 +95,6 @@ void setup() {
     () => AddContact(userRepository: getIt.get<UserRepository>()),
   );
 
-  getIt.registerLazySingleton(
-    () => ContactCubit(
-      findByEmail: getIt.get<FindByEmailUseCase>(),
-      findMyContacts: getIt.get<FindMyContacts>(),
-      addContact: getIt.get<AddContact>(),
-    ),
-  );
-
   //Home
 
   getIt.registerLazySingleton(
@@ -114,10 +102,14 @@ void setup() {
       conversationRepository: getIt.get<ConversationRepository>(),
     ),
   );
-
   getIt.registerLazySingleton(
-    () => HomeCubit(conversationUseCase: getIt.get<ConversationUseCase>()),
+    () => FindStoryMyContacts(
+      findMyRepository: getIt.get<FindMyRepository>(),
+    videosShortsRepository: getIt.get<VideosShortsRepository>(),
+    ),
   );
+
+
   //COnversation
 
   getIt.registerLazySingleton(
@@ -152,28 +144,13 @@ void setup() {
     () => SendMessageUseCase(messageRepository: getIt.get<MessageRepository>()),
   );
 
-  getIt.registerLazySingleton(
-    () => ConversationCubit(
-      findAllMessageUseCase: getIt.get<FindAllMessageUseCase>(),
-      findMyUseCase: getIt.get<FindMyUseCase>(),
-      receivedMessageUseCase: getIt.get<ReceivedMessageUserCase>(),
-      sendMessageUseCase: getIt.get<SendMessageUseCase>(),
-    ),
-  );
-
   //Story
-
-  getIt.registerLazySingleton<ShortVideoRepository>(
-    () => VideosShortsRepository(),
-  );
   getIt.registerLazySingleton(
     () => FindShortVideos(
-      shortVideoRepository: getIt.get<ShortVideoRepository>(),
+      shortVideoRepository: getIt.get<VideosShortsRepository>(),
     ),
   );
-  getIt.registerLazySingleton(
-    () => StoryCubit(findShortVIdeos: getIt.get<FindShortVideos>()),
-  );
+  
 
   //SplashScreen
   getIt.registerLazySingleton(

@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:chat/src/app/core/message/chat_message.dart';
-import 'package:chat/src/app/core/provider/service_locator.dart';
 import 'package:chat/src/app/core/ui/widgets/chat_loader.dart';
 import 'package:chat/src/app/domain/model/conversation.dart';
 import 'package:chat/src/app/presentation/features/conversation/bloc/conversation_cubit.dart';
@@ -18,7 +17,7 @@ class ConversationPage extends StatefulWidget {
 }
 
 class _ConversationPageState extends State<ConversationPage> {
-  final conversationBloc = getIt.get<ConversationCubit>();
+ 
   final _messageEC = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late ScrollController _scrolController;
@@ -41,7 +40,7 @@ class _ConversationPageState extends State<ConversationPage> {
     _scrolController = ScrollController();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_){
-      conversationBloc.findAllMessages(widget.conversation.id);
+     context.read<ConversationCubit>().findAllMessages(widget.conversation.id);
     });
   }
 
@@ -54,6 +53,7 @@ class _ConversationPageState extends State<ConversationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final conversationBloc = context.read<ConversationCubit>();
     
 
     return Scaffold(
@@ -83,7 +83,7 @@ class _ConversationPageState extends State<ConversationPage> {
         child: Column(
           children: [
             BlocConsumer<ConversationCubit, ConversationState>(
-              bloc: conversationBloc,
+             
               listener: (context, state) {
                 if (state.status == ConversationStatus.error) {
                   ChatMessage.showError(

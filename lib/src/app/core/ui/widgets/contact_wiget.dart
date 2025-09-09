@@ -1,12 +1,20 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
     
-class ContactWiget extends StatelessWidget {
-
-  const ContactWiget({ super.key });
+class StoryContactWiget extends StatelessWidget {
+   final String name ;
+   final String urlImage;
+   final VoidCallback onTap;
+  const StoryContactWiget({ super.key, required this.name, required this.urlImage, required this.onTap });
   
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: (){
+         log("STORY teste");
+         onTap();
+      } ,
       child: Column(
         spacing: 10,
         children: [
@@ -16,7 +24,7 @@ class ContactWiget extends StatelessWidget {
               backgroundColor: Colors.amber,
               foregroundColor:  Colors.amber, 
               radius: 30,
-              backgroundImage: NetworkImage('https://images.pexels.com/photos/33646930/pexels-photo-33646930.jpeg'),
+              backgroundImage: NetworkImage(urlImage),
               child: SizedBox( 
                 height: 85,
                 width: 85,
@@ -27,9 +35,7 @@ class ContactWiget extends StatelessWidget {
                 )),
             ),
           ),
-          Center(child: Text('Nome'),)
-      
-      
+          Center(child: Text(name),)
         ],
       ),
     );

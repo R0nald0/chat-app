@@ -1,11 +1,11 @@
 
 import 'package:chat/src/app/domain/model/videos.dart';
-import 'package:chat/src/app/domain/repository/short_video_repository.dart';
+import 'package:chat/src/app/domain/repository/videos_shorts_repository.dart';
 
 class FindShortVideos {
-  final ShortVideoRepository _shortVideoRepository;
+  final VideosShortsRepository _shortVideoRepository;
 
-  FindShortVideos({required ShortVideoRepository shortVideoRepository}) :_shortVideoRepository =shortVideoRepository;
+  FindShortVideos({required VideosShortsRepository shortVideoRepository}) :_shortVideoRepository =shortVideoRepository;
 
   Future<List<Video>> call() => _shortVideoRepository.finalAll();
 

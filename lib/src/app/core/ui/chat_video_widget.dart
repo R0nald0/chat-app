@@ -90,14 +90,7 @@ class _ChatVideoWidgetState extends State<ChatVideoWidget> {
     final VideoPlayerValue( :isInitialized, :isPlaying,:aspectRatio) = _videoPlayerController.value;
   
     return Scaffold(
-      
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 60),
-        child: FloatingActionButton(onPressed: () {},
-         
-        child: Icon(Icons.add),
-        ),
-      ) ,
+     
       body: InkWell(
         onTap: () {
           _togglePlayPause();

@@ -1,20 +1,20 @@
-import 'package:chat/src/app/core/constants/chat_constants.dart';
+import 'dart:developer';
+
 import 'package:chat/src/app/core/exceptions/data_source_exception.dart';
 import 'package:chat/src/app/core/exceptions/repository_exception.dart';
 import 'package:chat/src/app/core/services/chat_service_sockte.dart';
 import 'package:chat/src/app/data/datasource/chat_message_rest_client.dart';
-import 'package:chat/src/app/data/dto/user_dto.dart';
 import 'package:chat/src/app/domain/model/message.dart';
 import 'package:chat/src/app/domain/repository/message_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MessageRepositoryImpl implements MessageRepository {
   final ChatMessageDataSouce _chatMessageDataSouce;
-  final ChatServiceSockte _chatServiceSockte = ChatServiceSockte();
+  final ChatServiceSockte _chatServiceSockte;
 
   MessageRepositoryImpl({
     required ChatMessageDataSouce chatMessageDataSouce,
-  }) : _chatMessageDataSouce = chatMessageDataSouce;
+    required ChatServiceSockte chatServiceSockte,
+  }) : _chatMessageDataSouce = chatMessageDataSouce,_chatServiceSockte =chatServiceSockte;
 
   @override
   Future<List<Message>> findAll(int conversationId) async {
@@ -26,20 +26,16 @@ class MessageRepositoryImpl implements MessageRepository {
   }
 
   @override
-  Future<void> sendMessage(({ String content,
+  Future<void> sendMessage(({ 
+  int unReadMessage  ,
+  String content,
   int conversationId,
   int senderId,
-  int destiontionId,
+  int destinationId,
   String subject})message) async {
     try {
-      final pref = await SharedPreferences.getInstance();
-      final user = pref.getString(ChatConstants.PREF_KEY);
-      
-      if (user == null) {
-        throw RepositoryException(message: 'Erro ao buscar dados do usuário');
-      }
-      final UserDto(:id) = UserDto.fromJson(user);
-      _chatServiceSockte.sendMessage(message);
+      log('Message repo ${message.toString()}');
+     await _chatServiceSockte.sendMessage(message);
     } on RepositoryException catch (e) {
       throw RepositoryException(message: e.message);
     }

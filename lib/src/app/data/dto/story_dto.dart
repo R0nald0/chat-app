@@ -50,6 +50,7 @@ class VideoDto {
   final String description;
   final int ownerId;
   final DateTime createdAt;
+  final bool private ;
 
   VideoDto({
     required this.id,
@@ -58,6 +59,7 @@ class VideoDto {
     required this.description,
     required this.ownerId,
     required this.createdAt,
+    required this.private
   });
 
   Map<String, dynamic> toMap() {
@@ -67,6 +69,7 @@ class VideoDto {
       'duration': duration,
       'description': description,
       'ownerId': ownerId,
+      'private' : private,
       'createdAt': createdAt.millisecondsSinceEpoch,
     };
   }
@@ -80,6 +83,7 @@ class VideoDto {
       'description': final String description,
       'ownerId': final int ownerId,
       'createdAt':final String date,
+      'private' : final bool private
     }
        =>VideoDto(
       id: id,
@@ -87,24 +91,14 @@ class VideoDto {
       duration: duration,
       description: description,
       ownerId: ownerId,
+      private: private,
       createdAt: DateTime.parse(date),
     ),
       _=> throw ArgumentError('Invalid json')
     };
   }
-
-  
-
   String toJson() => json.encode(toMap());
 
   factory VideoDto.fromJson(String source) =>
       VideoDto.fromMap(json.decode(source));
 }
-/* StoryDto(
-      id: map['id'],
-      imageUrl: map['image_url'] ?? '',
-      name: map['name'] ?? '',
-      storys: List<VideoDto>.from(
-        map['videos']?.map((x) => VideoDto.fromMap(x)) ?? const [],
-      ),
-    ); */

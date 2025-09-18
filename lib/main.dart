@@ -4,5 +4,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   setup();
+
+  
   runApp(const ChatMainWidget());
 }

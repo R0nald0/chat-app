@@ -2,6 +2,7 @@ import 'package:chat/src/app/core/message/chat_message.dart';
 import 'package:chat/src/app/core/ui/widgets/chat_loader.dart';
 import 'package:chat/src/app/core/ui/widgets/contact_info_widget.dart';
 import 'package:chat/src/app/domain/model/conversation.dart';
+import 'package:chat/src/app/domain/model/message.dart';
 import 'package:chat/src/app/presentation/features/contacts/bloc/contact_cubit.dart';
 import 'package:chat/src/app/presentation/features/contacts/bloc/contact_state.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,7 @@ class _ContactsPageState extends State<ContactsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-    
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {});
   }
 
   @override
@@ -34,8 +33,9 @@ class _ContactsPageState extends State<ContactsPage> {
 
   @override
   Widget build(BuildContext context) {
-   final  contactBloc = context.read<ContactCubit>();
-     return Scaffold(
+    final navigate = Navigator.of(context);
+    final contactBloc = context.read<ContactCubit>();
+    return Scaffold(
       appBar: AppBar(title: const Text('Find Contacts')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -49,7 +49,7 @@ class _ContactsPageState extends State<ContactsPage> {
                 listener: (context, state) {
                   if (state.status == ContactStatus.error) {
                     showResultSearch = false;
-                   
+
                     ChatMessage.showError(
                       state.message ?? 'Conto não encontrado',
                       context,
@@ -72,8 +72,11 @@ class _ContactsPageState extends State<ContactsPage> {
                                 )
                               : IconButton(
                                   onPressed: () {
-                                    verifySearchText(_searchEC.text,contactBloc);
-                                     _searchEC.text = '';
+                                    verifySearchText(
+                                      _searchEC.text,
+                                      contactBloc,
+                                    );
+                                    _searchEC.text = '';
                                   },
                                   icon: Icon(Icons.add),
                                 ),
@@ -88,8 +91,8 @@ class _ContactsPageState extends State<ContactsPage> {
                         hintText: 'Find contact',
 
                         onSubmitted: (email) {
-                          verifySearchText(email,contactBloc);
-                           _searchEC.text = '';
+                          verifySearchText(email, contactBloc);
+                          _searchEC.text = '';
                         },
                         onChanged: (value) {
                           if (value.isEmpty) {
@@ -100,9 +103,10 @@ class _ContactsPageState extends State<ContactsPage> {
                       ),
                       Visibility(
                         replacement: SizedBox.shrink(),
-                        visible :status == ContactStatus.findUser &&
-                            showResultSearch && contact != null
-                            , 
+                        visible:
+                            status == ContactStatus.findUser &&
+                            showResultSearch &&
+                            contact != null,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,8 +149,32 @@ class _ContactsPageState extends State<ContactsPage> {
                 'My contacts',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
               ),
-              BlocBuilder<ContactCubit, ContactState>(
-               
+
+              BlocConsumer<ContactCubit, ContactState>(
+                listener: (context, state) {
+                  if (state.status == ContactStatus.findConversationUsers) {
+                    
+                    final privateConversation = Conversation(
+                      id: state.conversationId ?? 0,
+                      contactimageUrl: state.contact!.urlImage,
+                      unreadMessages: 0,
+                      idContact: state.contact!.id!,
+                      lastMassage: Message(
+                        id: 0,
+                        senderId: 0 ,
+                        conversationId: 0,
+                        content: "fake",
+                        createdAt: '',
+                      ),
+
+                      contactName: state.contact!.name,
+                    );
+                    navigate.pushNamed(
+                      '/home/conversation',
+                      arguments: privateConversation,
+                    );
+                  }
+                },
                 builder: (context, state) {
                   final ContactState(:status, :contacts) = state;
                   return Expanded(
@@ -163,17 +191,9 @@ class _ContactsPageState extends State<ContactsPage> {
                             imageUrl: myContatc.urlImage,
                             description: myContatc.email,
                             icon: Icon(Icons.message),
-                            onTap: () {
-                              final privateConversation = Conversation(
-                                contactimageUrl: myContatc.urlImage,
-                                idContact: myContatc.id!,
-                                lastMassage: '',
-                                timeLastMessage: DateTime.now(),
-                                contactName: myContatc.name,
-                              );
-                              Navigator.of(context).pushNamed(
-                                '/home/conversation',
-                                arguments: privateConversation,
+                            onTap: () async {
+                              await contactBloc.findConversationByContactId(
+                                myContatc,
                               );
                             },
                           );
@@ -190,7 +210,7 @@ class _ContactsPageState extends State<ContactsPage> {
     );
   }
 
-  void verifySearchText(String email ,ContactCubit contactBloc) {
+  void verifySearchText(String email, ContactCubit contactBloc) {
     if (email.isNotEmpty) {
       contactBloc.findUserByEmail(email);
       showResultSearch = true;

@@ -18,8 +18,10 @@ import 'package:chat/src/app/domain/repository/user_repository.dart';
 import 'package:chat/src/app/domain/repository/videos_shorts_repository.dart';
 import 'package:chat/src/app/domain/usecase/add_contact.dart';
 import 'package:chat/src/app/domain/usecase/conversation_use_case.dart';
+import 'package:chat/src/app/domain/usecase/create_conversation_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_all_message_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_by_email_use_case.dart';
+import 'package:chat/src/app/domain/usecase/find_conversation_by_contactId_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_my_contacts.dart';
 import 'package:chat/src/app/domain/usecase/find_my_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_short_videos.dart';
@@ -29,6 +31,8 @@ import 'package:chat/src/app/domain/usecase/lout_use_case.dart';
 import 'package:chat/src/app/domain/usecase/received_message_user_case.dart';
 import 'package:chat/src/app/domain/usecase/register_use_case.dart';
 import 'package:chat/src/app/domain/usecase/send_message_use_case.dart';
+import 'package:chat/src/app/domain/usecase/update_read_conversation_use_case.dart';
+import 'package:chat/src/app/presentation/features/auth/bloc/auth_cubit.dart';
 import 'package:chat/src/app/presentation/features/splashcreen/bloc/splash_screen_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -55,7 +59,7 @@ void setup() {
   );
   getIt.registerLazySingleton<VideosShortsRepository>(
     () => VideosShortsRepositoryImpl(
-      chatVideosRestClient: getIt.get<ChatVideosRestClient>()
+      chatVideosRestClient: getIt.get<ChatVideosRestClient>(),
     ),
   );
   //Auth
@@ -73,7 +77,16 @@ void setup() {
     () => RegisterUseCase(authRepository: getIt.get<AuthRepository>()),
   );
 
+  getIt.registerLazySingleton(
+    () => AuthCubit(
+      loginUseCase: getIt.get<LoginUseCase>(),
+      registrtUseCase: getIt.get<RegisterUseCase>(),
+      logoutUseCse: getIt.get<LogoutUseCase>(),
+    ),
+  );
+
   //Contact
+
   getIt.registerLazySingleton(
     () => ChatUserRestClient(storage: getIt.get<FlutterSecureStorage>()),
   );
@@ -96,6 +109,11 @@ void setup() {
   );
 
   //Home
+  getIt.registerLazySingleton(
+    () => UpdateReadConversationUseCase(
+      conversationRepository: getIt.get<ConversationRepository>(),
+    ),
+  );
 
   getIt.registerLazySingleton(
     () => ConversationUseCase(
@@ -105,10 +123,9 @@ void setup() {
   getIt.registerLazySingleton(
     () => FindStoryMyContacts(
       findMyRepository: getIt.get<FindMyRepository>(),
-    videosShortsRepository: getIt.get<VideosShortsRepository>(),
+      videosShortsRepository: getIt.get<VideosShortsRepository>(),
     ),
   );
-
 
   //COnversation
 
@@ -122,6 +139,7 @@ void setup() {
   getIt.registerLazySingleton<MessageRepository>(
     () => MessageRepositoryImpl(
       chatMessageDataSouce: getIt.get<ChatMessageDataSouce>(),
+      chatServiceSockte: getIt.get<ChatServiceSockte>(),
     ),
   );
 
@@ -143,6 +161,15 @@ void setup() {
   getIt.registerLazySingleton(
     () => SendMessageUseCase(messageRepository: getIt.get<MessageRepository>()),
   );
+  
+  getIt.registerLazySingleton(
+    () => FindConversationByContactIdUseCase(conversationRepository: getIt.get<ConversationRepository>()),
+  );
+  
+  getIt.registerLazySingleton(
+    () => CreateConversationUseCase(conversationRepository: getIt.get<ConversationRepository>()),
+  );
+
 
   //Story
   getIt.registerLazySingleton(
@@ -150,7 +177,6 @@ void setup() {
       shortVideoRepository: getIt.get<VideosShortsRepository>(),
     ),
   );
-  
 
   //SplashScreen
   getIt.registerLazySingleton(

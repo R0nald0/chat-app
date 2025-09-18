@@ -1,88 +1,78 @@
+import 'dart:convert';
+
+import 'package:chat/src/app/data/dto/message_dto.dart';
+
 class ConversationDto {
-  final int id;
+  final int? id;
   final String subject;
+  final String? lastMessage;
+  final int? unreadMessages;
   final List<UserNameDto> users;
   final List<MessageDto> messages;
 
   ConversationDto({
     required this.id,
     required this.subject,
+    required this.lastMessage,
+    required this.unreadMessages,
     required this.users,
     required this.messages,
   });
 
-  factory ConversationDto.fromJson(Map<String, dynamic> json) {
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'subject': subject,
+      'lastMessage': lastMessage,
+      'unreadMessages': unreadMessages,
+      'users': users.map((x) => x.toMap()).toList(),
+      'messages': messages.map((x) => x.toMap()).toList(),
+    };
+  }
+
+  factory ConversationDto.fromMap(Map<String, dynamic> map) {
     return ConversationDto(
-      id: json['id'],
-      subject: json['subject'] ?? '',
-      users: (json['users'] as List<dynamic>)
-          .map((u) => UserNameDto.fromJson(u))
+      id: map['id'] as int?,
+      subject: map['subject'] as String? ?? '',
+      lastMessage: map['lastMessage'] as String?,
+      unreadMessages: map['unreadMessages'] as int?,
+      users: (map['users'] as List<dynamic>? ?? [])
+          .map((e) => UserNameDto.fromMap(e as Map<String, dynamic>))
           .toList(),
-      messages: (json['messages'] as List<dynamic>)
-          .map((m) => MessageDto.fromJson(m))
+      messages: (map['messages'] as List<dynamic>? ?? [])
+          .map((e) => MessageDto.fromMap(e as Map<String, dynamic>))
           .toList(),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'subject': subject,
-      'users': users.map((u) => u.toJson()).toList(),
-      'messages': messages.map((m) => m.toJson()).toList(),
-    };
-  }
+  String toJson() => json.encode(toMap());
+
+  factory ConversationDto.fromJson(String source) =>
+      ConversationDto.fromMap(json.decode(source));
 }
 
 class UserNameDto {
   final String name;
-  final int id;
+  final int? id;
   final String? imageUrl;
 
-  UserNameDto({required this.name,required this.id,required this.imageUrl});
+  UserNameDto({required this.name, required this.id, this.imageUrl});
 
-  factory UserNameDto.fromJson(Map<String, dynamic> json) {
+  Map<String, dynamic> toMap() {
+    return {'name': name, 'id': id, 'image_url': imageUrl};
+  }
+
+  factory UserNameDto.fromMap(Map<String, dynamic> map) {
     return UserNameDto(
-      imageUrl: json['image_url'],
-      name: json['name'],
-      id: json['id'],
-      
+      name: map['name'] as String? ?? '',
+      id: map['id'] as int?,
+      imageUrl: map['image_url'] as String?, // <- backend usa snake_case
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'image_url' : imageUrl,
-      'id' :id
-    };
-  }
+  String toJson() => json.encode(toMap());
+
+  factory UserNameDto.fromJson(String source) =>
+      UserNameDto.fromMap(json.decode(source));
 }
 
-class MessageDto {
-  final String content;
-  final int senderId;
-  final DateTime createdAt;
-
-  MessageDto({
-    required this.content,
-    required this.senderId,
-    required this.createdAt,
-  });
-
-  factory MessageDto.fromJson(Map<String, dynamic> json) {
-    return MessageDto(
-      content: json['content'],
-      senderId: json['senderId'],
-      createdAt: DateTime.parse(json['createdAt']),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'content': content,
-      'senderId': senderId,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
-}

@@ -9,23 +9,45 @@ import 'package:chat/src/app/presentation/features/story/bloc/story_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class StoryPage extends StatelessWidget {
+class StoryPage extends StatefulWidget {
   final List<Video>? _storys;
 
   const StoryPage({super.key, List<Video>? video}) : _storys = video;
 
   @override
+  State<StoryPage> createState() => _StoryPageState();
+}
+
+class _StoryPageState extends State<StoryPage> {
+
+ 
+ 
+
+  @override
+  void initState() {
+    super.initState();
+ 
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _storys != null && _storys.isNotEmpty ?AppBar() :null,
+      appBar: widget._storys != null && widget._storys!.isNotEmpty
+          ? AppBar()
+          : null,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 60),
-        child: FloatingActionButton(onPressed: () {}, child: Icon(Icons.add)),
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/story/camera');
+          },
+        ),
       ),
       body: BlocProvider(
         create: (context) =>
             StoryCubit(findShortVIdeos: getIt.get<FindShortVideos>())
-              ..finalAllShortsVideos(_storys),
+              ..finalAllShortsVideos(widget._storys),
         child: BlocConsumer<StoryCubit, StoryState>(
           listener: (context, state) {
             if (state.status == StoryStatus.error) {

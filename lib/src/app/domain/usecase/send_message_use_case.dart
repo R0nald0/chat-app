@@ -6,10 +6,12 @@ class SendMessageUseCase {
 
    SendMessageUseCase({required MessageRepository messageRepository}) :_messageRepository= messageRepository;
 
-   Future<void> call(({ String content,
+   Future<void> call(({ 
+  int unReadMessage,
+  String content,
   int conversationId,
   int senderId,
-  int destiontionId,
+  int destinationId,
   String subject})message) async{
        _messageRepository.sendMessage(message);
    } 

@@ -10,6 +10,7 @@ import 'package:chat/src/app/domain/repository/videos_shorts_repository.dart';
 class VideosShortsRepositoryImpl implements VideosShortsRepository {
   final videos = [
     Video(
+      private: false,
       descrition: "Passeio na praia ao pôr do sol 🌅",
       urlVideo: "https://www.pexels.com/pt-br/download/video/2231485/",
       duration: 30,
@@ -21,6 +22,7 @@ class VideosShortsRepositoryImpl implements VideosShortsRepository {
       createdAt: DateTime.now(),
     ),
     Video(
+      private: false,
       descrition: "Treino rápido de HIIT 💪",
       urlVideo: "https://www.pexels.com/pt-br/download/video/5310972/",
       duration: 45,
@@ -32,6 +34,7 @@ class VideosShortsRepositoryImpl implements VideosShortsRepository {
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
     ),
     Video(
+      private: false,
       descrition: "Receita de bolo de chocolate 🍫",
       urlVideo: "https://www.pexels.com/pt-br/download/video/3992584/",
       duration: 60,
@@ -43,6 +46,7 @@ class VideosShortsRepositoryImpl implements VideosShortsRepository {
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
     Video(
+      private: false,
       descrition: "Truques de mágica impressionantes 🎩✨",
       urlVideo: "https://www.pexels.com/pt-br/download/video/3760750/",
       duration: 25,
@@ -54,6 +58,7 @@ class VideosShortsRepositoryImpl implements VideosShortsRepository {
       createdAt: DateTime.now().subtract(const Duration(hours: 10)),
     ),
     Video(
+      private: false,
       descrition: "Tour pelo meu setup gamer 🎮",
       urlVideo: "https://www.pexels.com/pt-br/download/video/8128342/",
       duration: 55,
@@ -66,8 +71,9 @@ class VideosShortsRepositoryImpl implements VideosShortsRepository {
     ),
   ];
   final ChatVideosRestClient _chatVideosRestClient;
-  VideosShortsRepositoryImpl({required ChatVideosRestClient chatVideosRestClient})
-    : _chatVideosRestClient = chatVideosRestClient;
+  VideosShortsRepositoryImpl({
+    required ChatVideosRestClient chatVideosRestClient,
+  }) : _chatVideosRestClient = chatVideosRestClient;
 
   @override
   Future<List<Video>> finalAll() async {
@@ -78,6 +84,24 @@ class VideosShortsRepositoryImpl implements VideosShortsRepository {
   Future<List<StoryDto>> findStoryMyContacts(int id) async {
     try {
       return await _chatVideosRestClient.auth().findStoryMyContacts(id);
+    } on DataSourceException catch (e) {
+      throw RepositoryException(message: e.message);
+    }
+  }
+
+  @override
+  Future<Video> create(
+    ({
+      String owneriId,
+      String description,
+      double duration,
+      bool privateVideo,
+      String urlVideo,
+    })
+    dataVideo,
+  ) async {
+    try {
+      return await _chatVideosRestClient.auth().createVideo(dataVideo);
     } on DataSourceException catch (e) {
       throw RepositoryException(message: e.message);
     }

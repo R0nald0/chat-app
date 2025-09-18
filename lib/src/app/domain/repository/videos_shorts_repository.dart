@@ -5,4 +5,15 @@ abstract interface class VideosShortsRepository {
   
  Future<List<Video>> finalAll();
  Future<List<StoryDto>> findStoryMyContacts(int id);
+
+ Future<Video> create(
+    ({
+      String owneriId,
+      String description,
+      double duration,
+      bool privateVideo,
+      String urlVideo,
+    })
+    dataVideo,
+  );
 }

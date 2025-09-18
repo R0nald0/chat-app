@@ -2,30 +2,35 @@ import 'dart:developer';
 
 import 'package:chat/src/app/core/extension/data_extension.dart';
 import 'package:chat/src/app/core/message/chat_message.dart';
+import 'package:chat/src/app/core/provider/service_locator.dart';
 import 'package:chat/src/app/core/ui/widgets/chat_loader.dart';
 import 'package:chat/src/app/core/ui/widgets/contact_wiget.dart';
 import 'package:chat/src/app/data/dto/story_dto.dart';
 import 'package:chat/src/app/domain/model/videos.dart';
+import 'package:chat/src/app/domain/usecase/find_my_use_case.dart';
 import 'package:chat/src/app/presentation/features/auth/bloc/auth_cubit.dart';
 import 'package:chat/src/app/presentation/features/auth/bloc/auth_state.dart';
 import 'package:chat/src/app/presentation/features/home/bloc/home_cubit.dart';
 import 'package:chat/src/app/presentation/features/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 
 class HomePage extends StatelessWidget {
- 
+  final authCubit = getIt.get<AuthCubit>();
   HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final homeCubit = context.read<HomeCubit>();
+    final navigate = Navigator.of(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text('Messages'),
         actions: [
           BlocListener<AuthCubit, AuthState>(
-            
+            bloc: authCubit,
             listener: (context, state) {
               if (state.status == AuthStatus.error) {
                 ChatMessage.showError(
@@ -41,7 +46,7 @@ class HomePage extends StatelessWidget {
             },
             child: IconButton(
               onPressed: () {
-                context.read<AuthCubit>().logout();
+                authCubit.logout();
               },
               icon: Icon(Icons.exit_to_app),
             ),
@@ -54,17 +59,14 @@ class HomePage extends StatelessWidget {
             return CustomScrollView(
               slivers: [
                 BlocSelector<HomeCubit, HomeState, List<StoryDto>>(
-              
                   selector: (state) {
                     if (state.status == HomeStatus.successStorys) {
-                       return state.story;
+                      return state.story;
                     }
                     return [];
                   },
                   builder: (context, state) {
-                    return RecentsSection(
-                      story:state,
-                    );
+                    return RecentsSection(story: state);
                   },
                 ),
                 SliverFillRemaining(
@@ -77,7 +79,6 @@ class HomePage extends StatelessWidget {
                       color: const Color.fromARGB(221, 23, 29, 1),
                     ),
                     child: BlocConsumer<HomeCubit, HomeState>(
-                 
                       listener: (context, state) {
                         if (state.status == HomeStatus.error) {
                           ChatMessage.showError(
@@ -88,8 +89,13 @@ class HomePage extends StatelessWidget {
                         }
                       },
                       builder: (context, state) {
-                        final HomeState(:conversations, :message, :status) =
-                            state;
+                        final HomeState(
+                          :conversations,
+                          :message,
+                          :status,
+                          :user,
+                        ) = state;
+
                         return switch (status) {
                           HomeStatus.initial => Center(
                             child: Text('Buscando dados'),
@@ -100,8 +106,12 @@ class HomePage extends StatelessWidget {
                           HomeStatus.loading => ChatLoader(),
                           _ => Visibility(
                             visible: conversations.isNotEmpty,
-                            replacement: Center(
-                              child: Text('Nenhuma conversa'),
+                            replacement: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                LottieBuilder.asset('assets/lottie/conversation.json',height: 240,),
+                                Text('Nenhuma conversa'),
+                              ],
                             ),
                             child: ListView.builder(
                               itemCount: conversations.length,
@@ -111,6 +121,9 @@ class HomePage extends StatelessWidget {
                               ),
                               itemBuilder: (context, index) {
                                 final conversation = conversations[index];
+                                log(
+                                  'last Messa  ${conversation.lastMassage.content}',
+                                );
                                 return ListTile(
                                   title: Text(
                                     conversation.contactName,
@@ -126,27 +139,62 @@ class HomePage extends StatelessWidget {
                                       style: TextStyle(
                                         fontWeight: FontWeight.w400,
                                         fontSize: 16,
+                                        color: Colors.blueGrey,
                                       ),
                                       children: [
                                         WidgetSpan(
-                                          child: Icon(
-                                            Icons.done_all,
-                                            size: 20,
-                                            color: Colors.blueGrey,
+                                          child: Visibility(
+                                            visible:
+                                                conversation.idContact ==
+                                                conversation.lastMassage.senderId,
+                                            child: Icon(
+                                              Icons.done_all,
+                                              size: 20,
+                                              color:
+                                                  conversation.unreadMessages == 
+                                                      0 && conversation.idContact !=
+                                                user?.id
+                                                  ? Colors.blue
+                                                  : Colors.blueGrey,
+                                            ),
                                           ),
                                         ),
                                         TextSpan(
-                                          text: ' ${conversation.lastMassage}',
+                                          text: ' ${conversation.lastMassage.content}',
                                         ),
                                       ],
                                     ),
                                   ),
-                                  trailing: Text(
-                                    conversation.timeLastMessage
-                                        .formatedToStringDayMinute(),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                  trailing: Visibility(
+                                    visible:
+                                        conversation.unreadMessages != 0 &&
+                                        conversation.idContact == conversation.lastMassage.senderId,
+                                    replacement: Text(
+                                      maxLines: 1,
+                                         conversation.lastMassage.createdAt ,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    child: Container(
+                                      width: 25,
+                                      height: 25,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(50),
+                                        color: Colors.amber,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${conversation.unreadMessages}',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
 
@@ -163,11 +211,14 @@ class HomePage extends StatelessWidget {
                                           )
                                         : null,
                                   ),
-                                  onTap: () {
-                                    Navigator.of(context).pushNamed(
+                                  onTap: () async {
+                                   
+                                  await  navigate.pushNamed(
                                       '/home/conversation',
                                       arguments: conversation,
                                     );
+                                    await  homeCubit.updateReadConversationMessages(conversation.id!);
+                                    await homeCubit.findStoryMyContacts();
                                   },
                                 );
                               },
@@ -188,16 +239,18 @@ class HomePage extends StatelessWidget {
 }
 
 class RecentsSection extends StatelessWidget {
+ 
   final List<StoryDto> story;
   const RecentsSection({super.key, required this.story});
 
   @override
   Widget build(BuildContext context) {
+     final navigate = Navigator.of(context);
     return SliverToBoxAdapter(
       child: Container(
         height: 160,
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 16,vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
           spacing: 10,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -215,20 +268,33 @@ class RecentsSection extends StatelessWidget {
                 shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: story.length,
+               
                 itemBuilder: (context, index) {
-                  final storyDto =  story[index];
+                  final storyDto = story[index];
                   return StoryContactWiget(
                     name: storyDto.name,
                     urlImage: storyDto.imageUrl,
-                    onTap: () {
-                      log("STORY ${storyDto.name}");
-                      
-                       if (storyDto.storys.isEmpty) {
-                         return;
+                    onTap: ()async {
+                      if (storyDto.storys.isEmpty   || index   == 0) {
+                         final user =await getIt.get<FindMyUseCase>().call();
+                         navigate.pushNamed('/story/camera',arguments:user);
+                        return;
                       }
+                      final videos = storyDto.storys
+                          .map(
+                            (s) => Video.fromVideoDto(
+                              storyDto.name,
+                              storyDto.imageUrl,
+                              s,
+                            ),
+                          )
+                          .toList();
                       
-                    final videos = storyDto.storys.map((s) => Video.fromVideoDto(storyDto.name, storyDto.imageUrl, s)).toList();
-                      Navigator.of(context).pushNamed('/home/story',arguments: videos) ;
+                        Navigator.of(context).pushNamed(
+                          '/home/story',
+                          arguments: videos,
+                        );
+                    
                     },
                   );
                 },

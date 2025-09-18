@@ -1,13 +1,13 @@
 import 'package:chat/src/app/core/provider/service_locator.dart';
+import 'package:chat/src/app/core/services/chat_service_sockte.dart';
 import 'package:chat/src/app/domain/usecase/add_contact.dart';
 import 'package:chat/src/app/domain/usecase/conversation_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_by_email_use_case.dart';
+import 'package:chat/src/app/domain/usecase/find_conversation_by_contactId_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_my_contacts.dart';
+import 'package:chat/src/app/domain/usecase/find_my_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_story_my_contacts.dart';
-import 'package:chat/src/app/domain/usecase/login_use_case.dart';
-import 'package:chat/src/app/domain/usecase/lout_use_case.dart';
-import 'package:chat/src/app/domain/usecase/register_use_case.dart';
-import 'package:chat/src/app/presentation/features/auth/bloc/auth_cubit.dart';
+import 'package:chat/src/app/domain/usecase/update_read_conversation_use_case.dart';
 import 'package:chat/src/app/presentation/features/contacts/bloc/contact_cubit.dart';
 import 'package:chat/src/app/presentation/features/contacts/contacts_page.dart';
 import 'package:chat/src/app/presentation/features/home/bloc/home_cubit.dart';
@@ -28,17 +28,17 @@ class _MainNavigationState extends State<MainNavigation> {
   List<Widget> pages = [
     MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => AuthCubit(
-          loginUseCase: getIt.get<LoginUseCase>(), 
-          registrtUseCase: getIt.get<RegisterUseCase>(), 
-          logoutUseCse: getIt.get<LogoutUseCase>()
-          ),),
         BlocProvider(
-          create: (context) => HomeCubit(
-            conversationUseCase: getIt.get<ConversationUseCase>(),
-            findStoryMyContacts: getIt.get<FindStoryMyContacts>(),
-          )..findAllByUser()
-          ..findStoryMyContacts(),
+          create: (context) =>
+              HomeCubit(
+                findMyUseCase: getIt.get<FindMyUseCase>(),
+                 updateReadConersationMessasge: getIt.get<UpdateReadConversationUseCase>(),
+                  conversationUseCase: getIt.get<ConversationUseCase>(),
+                  findStoryMyContacts: getIt.get<FindStoryMyContacts>(),
+                  chatServiceSockte: getIt.get<ChatServiceSockte>()
+                )
+                ..findAllByUser()
+                
         ),
       ],
       child: HomePage(),
@@ -48,6 +48,7 @@ class _MainNavigationState extends State<MainNavigation> {
       providers: [
         BlocProvider(
           create: (context) => ContactCubit(
+            byContactIdUseCase: getIt.get<FindConversationByContactIdUseCase>(),
             findByEmail: getIt.get<FindByEmailUseCase>(),
             findMyContacts: getIt.get<FindMyContacts>(),
             addContact: getIt.get<AddContact>(),

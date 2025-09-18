@@ -1,59 +1,53 @@
-import 'dart:convert';
+
+
+import 'package:chat/src/app/data/dto/conversation_dto.dart';
+import 'package:chat/src/app/domain/model/message.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 class Conversation {
   final int? id;
   final int idContact;
-  final String lastMassage;
+  final Message lastMassage;
   final String? contactimageUrl;
-  final DateTime timeLastMessage;
   final String contactName;
+  final int unreadMessages ;
   Conversation({
     this.id,
     this.contactimageUrl,
+    required this.unreadMessages,
     required this.idContact,
     required this.lastMassage,
-    required this.timeLastMessage,
     required this.contactName,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'contactimageUrl' :contactimageUrl,
-      'idContact': idContact,
-      'lastMassage': lastMassage,
-      'timeLastMessage': timeLastMessage.millisecondsSinceEpoch,
-      'contactName': contactName,
-      
-    };
+
+  factory Conversation.fromDto(ConversationDto dto){
+    return Conversation(
+        id: dto.id,
+        contactimageUrl: dto.users.first.imageUrl,
+        lastMassage: Message.fromDto(dto.messages.first) ,
+         unreadMessages: dto.unreadMessages ?? 0,
+        contactName: dto.users.first.name,
+        idContact: dto.messages.first.senderId!
+        );
   }
-
-  factory Conversation.fromMap(Map<String, dynamic> map) {
-
-    
-    return switch (map) {
-      {
-        'id': final int id,
-        'lastMassage': final String lastMassage,
-        'timeLastMessage': final String timeLastMessage,
-        'contactName': final String contactName,
-        'idContact' : final int idContact,
-        'contactimageUrl' : final String contactImageUrl
-      } =>
-        Conversation(
-          id: id,
-          contactimageUrl: contactImageUrl ,
-          lastMassage:lastMassage,
-          timeLastMessage: DateTime.parse(timeLastMessage),
-          contactName: contactName,
-          idContact: idContact
-        ),
-      _ => throw ArgumentError("Invalid Json"),
-    };
+  Conversation copyWith({
+    ValueGetter<int?>? id,
+    int? idContact,
+    Message? lastMassage,
+    ValueGetter<String?>? contactimageUrl,
+    DateTime? timeLastMessage,
+    String? contactName,
+    int? unreadMessages,
+  }) {
+    return Conversation(
+      id: id != null ? id() : this.id,
+      idContact: idContact ?? this.idContact,
+      unreadMessages: unreadMessages ?? this.unreadMessages,
+      lastMassage: lastMassage ?? this.lastMassage,
+      contactimageUrl: contactimageUrl != null ? contactimageUrl() : this.contactimageUrl,
+      contactName: contactName ?? this.contactName,
+    );
   }
-
-  String toJson() => json.encode(toMap());
-
-  factory Conversation.fromJson(String source) =>
-      Conversation.fromMap(json.decode(source));
 }

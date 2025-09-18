@@ -7,6 +7,7 @@ import 'package:chat/src/app/presentation/features/conversation/bloc/conversatio
 import 'package:chat/src/app/presentation/features/conversation/bloc/conversation_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 
 class ConversationPage extends StatefulWidget {
   final Conversation conversation;
@@ -40,7 +41,10 @@ class _ConversationPageState extends State<ConversationPage> {
     _scrolController = ScrollController();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_){
-     context.read<ConversationCubit>().findAllMessages(widget.conversation.id);
+     final Conversation(:id,:idContact) = widget.conversation;
+     log('ID $id' );
+     log('ID Contato $idContact' );
+     context.read<ConversationCubit>().findAllMessages(id);
     });
   }
 
@@ -55,7 +59,6 @@ class _ConversationPageState extends State<ConversationPage> {
   Widget build(BuildContext context) {
     final conversationBloc = context.read<ConversationCubit>();
     
-
     return Scaffold(
       appBar: AppBar(
         elevation: 2,
@@ -103,47 +106,51 @@ class _ConversationPageState extends State<ConversationPage> {
                 return switch (status) {
                   ConversationStatus.loading => ChatLoader(),
                   _ => Expanded(
-                    child: ListView.builder(
-                      controller: _scrolController,
-                      shrinkWrap: true,
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        final message = messages[index];
-                        return Align(
-                          alignment: message.senderId != my!.id
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: FractionallySizedBox(
-                            widthFactor: 0.8,
-                            child: Container(
-                              padding: EdgeInsets.all(16),
-                              margin: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: Colors.amberAccent.shade700.withAlpha(
-                                  189,
+                    child: Visibility(
+                      replacement: Center(child: LottieBuilder.asset('assets/lottie/message.json',height: 240,)),
+                      visible: messages.isNotEmpty,
+                      child: ListView.builder(
+                        controller: _scrolController,
+                        shrinkWrap: true,
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          return Align(
+                            alignment: message.senderId == my!.id
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: FractionallySizedBox(
+                              widthFactor: 0.8,
+                              child: Container(
+                                padding: EdgeInsets.all(16),
+                                margin: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.amberAccent.shade700.withAlpha(
+                                    189,
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      message.content,
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w600,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        message.content,
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Text(message.createdAt),
-                                ],
+                                    Text(message.createdAt),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 };
@@ -178,7 +185,10 @@ class _ConversationPageState extends State<ConversationPage> {
                               case false:
                                 {}
                               case true:
-                                {
+                                {  
+                                  if (_messageEC.text.isEmpty) {
+                                     return;
+                                  }
                                   conversationBloc.sendMessage(
                                     _messageEC.text,
                                     widget.conversation,

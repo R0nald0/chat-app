@@ -12,6 +12,16 @@ sealed class ChatAppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+    textTheme: TextTheme(
+      labelLarge: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w500
+      )
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
@@ -29,6 +39,16 @@ sealed class ChatAppTheme {
   static final dark = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
+    textTheme: TextTheme(
+      labelLarge: TextStyle(
+        fontSize: 19,
+        fontWeight: FontWeight.bold
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500
+      )
+    ),
     scaffoldBackgroundColor: Colors.black,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.orange,

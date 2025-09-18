@@ -7,6 +7,7 @@ import 'package:chat/src/app/core/exceptions/user_not_found.dart';
 import 'package:chat/src/app/domain/model/user.dart';
 import 'package:chat/src/app/domain/usecase/add_contact.dart';
 import 'package:chat/src/app/domain/usecase/find_by_email_use_case.dart';
+import 'package:chat/src/app/domain/usecase/find_conversation_by_contactId_use_case.dart';
 import 'package:chat/src/app/domain/usecase/find_my_contacts.dart';
 import 'package:chat/src/app/presentation/features/contacts/bloc/contact_state.dart';
 
@@ -14,16 +15,41 @@ class ContactCubit extends Cubit<ContactState> {
   final FindByEmailUseCase _findByEmail;
   final FindMyContacts _findMyContacts;
   final AddContact _addContact;
+  final FindConversationByContactIdUseCase _byContactIdUseCase;
 
-  ContactCubit({
+
+  
+  ContactCubit( {
+     required FindConversationByContactIdUseCase byContactIdUseCase,
     required FindByEmailUseCase findByEmail,
     required FindMyContacts findMyContacts,
     required AddContact addContact,
   }) : _findByEmail = findByEmail,
        _findMyContacts = findMyContacts,
        _addContact = addContact,
+       _byContactIdUseCase = byContactIdUseCase,
        super(ContactState.initial());
-
+  
+  Future<void> findConversationByContactId(User contact) async {
+    try {
+    
+    emit(state.copyWith(status: ContactStatus.loading,conversationId: () => null,contact: () => null));
+    log('Contact ${contact.name }');
+    final convesation  =  await _byContactIdUseCase.call(contact.id!); 
+   
+    emit(state.copyWith(
+      status: ContactStatus.findConversationUsers,
+      contact: () => contact,
+      conversationId: () => convesation,),);
+    }on RepositoryException catch (e) {
+      emit(
+        state.copyWith(
+          status: ContactStatus.error,
+          message: () => e.message,
+        ),
+      );
+    }
+  }
   Future<void> findUserByEmail(String email) async {
     try {
         state.copyWith(contact: null);
